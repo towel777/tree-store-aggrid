@@ -4,6 +4,7 @@ import { computed } from "vue";
 import type { TreeItem } from "@/entities/treeStore/types";
 import type { ColDef, RowClassParams } from "ag-grid-community";
 import { TreeStore } from "@/entities/treeStore";
+import CustomCell from "./CustomCell.vue";
 
 interface GridRow extends TreeItem {
   path: string[];
@@ -29,13 +30,14 @@ function buildPath(item: TreeItem, store: TreeStore<TreeItem>): string[] {
     .map((i) => i.label);
 }
 
-const rowData = computed(() =>
+const rowData = computed(() => {
+   return {store,
   store.getAll().map((item) => ({
     ...item,
     path: buildPath(item, store),
     category: store.getChildren(item.id).length ? "Группа" : "Элемент",
-  }))
-);
+  }))}
+});
 
 const columnDefs: ColDef<GridRow>[] = [
   {
@@ -53,8 +55,11 @@ const autoGroupColumnDef: ColDef<GridRow> = {
   flex: 1,
   cellRendererParams: {
     suppressCount: true,
+    innerRender: CustomCell,
+    
   },
-  valueGetter: (obj) => obj.data?.category,
+  
+  valueGetter: (obj) => obj.data,
 };
 const rowClassRules: Record<
   string,
